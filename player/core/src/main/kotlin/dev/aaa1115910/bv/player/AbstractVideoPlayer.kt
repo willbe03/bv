@@ -13,8 +13,13 @@ abstract class AbstractVideoPlayer {
     /** 设置请求头 */
     abstract fun setHeader(headers: Map<String, String>)
 
-    /** 设置播放地址 */
-    abstract fun playUrl(videoUrl: String? = null, audioUrl: String? = null)
+    /** 设置播放地址，备用地址供多线程下载使用 */
+    abstract fun playUrl(
+        videoUrl: String? = null,
+        audioUrl: String? = null,
+        videoBackupUrls: List<String> = emptyList(),
+        audioBackupUrls: List<String> = emptyList()
+    )
 
     /** 准备开始播放 */
     abstract fun prepare()

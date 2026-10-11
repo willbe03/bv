@@ -208,6 +208,13 @@
     <string name="settings_item_ui">界面设置</string>
     <string name="settings_network_enable_proxy_text">使用自定义代理服务器获取部分视频播放地址</string>
     <string name="settings_network_enable_proxy_title">启用代理</string>
+    <string name="settings_network_parallel_cdn_mainland">大陆节点</string>
+    <string name="settings_network_parallel_cdn_overseas">海外节点</string>
+    <string name="settings_network_parallel_cdn_title">多线程下载使用的 CDN 节点</string>
+    <string name="settings_network_parallel_download_text">同时从多个 CDN 节点分段下载视频，改善海外播放卡顿</string>
+    <string name="settings_network_parallel_download_title">多线程下载</string>
+    <string name="settings_network_parallel_threads_text">%d 条线程，按确认键切换</string>
+    <string name="settings_network_parallel_threads_title">下载线程数</string>
     <string name="settings_network_prefer_official_cdn_text">优先使用获取到的官方 CDN</string>
     <string name="settings_network_prefer_official_cdn_title">P(M)CDN 快走开</string>
     <string name="settings_network_proxy_grpc_server_title">gRPC 接口代理服务器</string>

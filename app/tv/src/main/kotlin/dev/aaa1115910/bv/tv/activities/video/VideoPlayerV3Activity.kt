@@ -10,8 +10,10 @@ import dev.aaa1115910.biliapi.entity.ApiType
 import dev.aaa1115910.bv.R
 import dev.aaa1115910.bv.entity.PlayerType
 import dev.aaa1115910.bv.entity.proxy.ProxyArea
+import dev.aaa1115910.bv.player.ParallelDownloadOptions
 import dev.aaa1115910.bv.player.VideoPlayerOptions
 import dev.aaa1115910.bv.player.impl.exo.ExoPlayerFactory
+import dev.aaa1115910.bv.player.parallel.CdnMode
 import dev.aaa1115910.bv.tv.screens.VideoPlayerV3Screen
 import dev.aaa1115910.bv.ui.theme.BVTheme
 import dev.aaa1115910.bv.util.Prefs
@@ -101,7 +103,13 @@ class VideoPlayerV3Activity : ComponentActivity() {
                 ApiType.Web -> getString(R.string.video_player_referer)
                 ApiType.App -> null
             },
-            enableFfmpegAudioRenderer = Prefs.enableFfmpegAudioRenderer
+            enableFfmpegAudioRenderer = Prefs.enableFfmpegAudioRenderer,
+            parallelDownload = if (Prefs.enableParallelDownload) {
+                ParallelDownloadOptions(
+                    threads = Prefs.parallelDownloadThreads,
+                    cdnMode = if (Prefs.parallelDownloadOverseas) CdnMode.Overseas else CdnMode.Mainland
+                )
+            } else null
         )
         val videoPlayer = when (Prefs.playerType) {
             PlayerType.Media3 -> ExoPlayerFactory().create(this, options)

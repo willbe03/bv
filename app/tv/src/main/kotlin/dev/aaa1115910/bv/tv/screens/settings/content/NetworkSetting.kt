@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,8 @@ import dev.aaa1115910.bv.ui.theme.BVTheme
 import dev.aaa1115910.bv.util.Prefs
 import org.koin.compose.getKoin
 
+private val parallelThreadOptions = listOf(4, 8, 16, 32)
+
 @Composable
 fun NetworkSetting(
     modifier: Modifier = Modifier,
@@ -52,6 +55,9 @@ fun NetworkSetting(
     var proxyHttpServer by remember { mutableStateOf(Prefs.proxyHttpServer) }
     var proxyGRPCServer by remember { mutableStateOf(Prefs.proxyGRPCServer) }
     var preferOfficialCdn by remember { mutableStateOf(Prefs.preferOfficialCdn) }
+    var enableParallelDownload by remember { mutableStateOf(Prefs.enableParallelDownload) }
+    var parallelDownloadThreads by remember { mutableIntStateOf(Prefs.parallelDownloadThreads) }
+    var parallelDownloadOverseas by remember { mutableStateOf(Prefs.parallelDownloadOverseas) }
     var showProxyHttpServerEditDialog by remember { mutableStateOf(false) }
     var showProxyGRPCServerEditDialog by remember { mutableStateOf(false) }
 
@@ -117,6 +123,51 @@ fun NetworkSetting(
                             Prefs.preferOfficialCdn = enable
                         }
                     )
+                }
+
+                item {
+                    Column {
+                        SettingSwitchListItem(
+                            title = stringResource(R.string.settings_network_parallel_download_title),
+                            supportText = stringResource(R.string.settings_network_parallel_download_text),
+                            checked = enableParallelDownload,
+                            onCheckedChange = { enable ->
+                                enableParallelDownload = enable
+                                Prefs.enableParallelDownload = enable
+                            }
+                        )
+                        AnimatedVisibility(visible = enableParallelDownload) {
+                            Column {
+                                SettingListItem(
+                                    modifier = Modifier.padding(top = 12.dp),
+                                    title = stringResource(R.string.settings_network_parallel_threads_title),
+                                    supportText = stringResource(
+                                        R.string.settings_network_parallel_threads_text,
+                                        parallelDownloadThreads
+                                    ),
+                                    onClick = {
+                                        val next = parallelThreadOptions.getOrElse(
+                                            parallelThreadOptions.indexOf(parallelDownloadThreads) + 1
+                                        ) { parallelThreadOptions.first() }
+                                        parallelDownloadThreads = next
+                                        Prefs.parallelDownloadThreads = next
+                                    }
+                                )
+                                SettingListItem(
+                                    modifier = Modifier.padding(top = 12.dp),
+                                    title = stringResource(R.string.settings_network_parallel_cdn_title),
+                                    supportText = stringResource(
+                                        if (parallelDownloadOverseas) R.string.settings_network_parallel_cdn_overseas
+                                        else R.string.settings_network_parallel_cdn_mainland
+                                    ),
+                                    onClick = {
+                                        parallelDownloadOverseas = !parallelDownloadOverseas
+                                        Prefs.parallelDownloadOverseas = parallelDownloadOverseas
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 item {

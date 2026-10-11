@@ -289,6 +289,18 @@ object Prefs {
         }
         set(value) = runBlocking { dsm.editPreference(PrefKeys.prefDefaultDanmakuMask, value) }
 
+    var enableParallelDownload: Boolean
+        get() = runBlocking { dsm.getPreferenceFlow(PrefKeys.prefEnableParallelDownloadRequest).first() }
+        set(value) = runBlocking { dsm.editPreference(PrefKeys.prefEnableParallelDownload, value) }
+
+    var parallelDownloadThreads: Int
+        get() = runBlocking { dsm.getPreferenceFlow(PrefKeys.prefParallelDownloadThreadsRequest).first() }
+        set(value) = runBlocking { dsm.editPreference(PrefKeys.prefParallelDownloadThreads, value) }
+
+    var parallelDownloadOverseas: Boolean
+        get() = runBlocking { dsm.getPreferenceFlow(PrefKeys.prefParallelDownloadOverseasRequest).first() }
+        set(value) = runBlocking { dsm.editPreference(PrefKeys.prefParallelDownloadOverseas, value) }
+
     var enableFfmpegAudioRenderer: Boolean
         get() = runBlocking {
             dsm.getPreferenceFlow(PrefKeys.prefEnableFfmpegEndererRequest).first()
@@ -362,6 +374,9 @@ object PrefKeys {
     val prefPreferOfficialCdn = booleanPreferencesKey("prefer_official_cdn")
     val prefDefaultDanmakuMask = booleanPreferencesKey("prefer_enable_webmark")
     val prefEnableFfmpegAudioRenderer = booleanPreferencesKey("enable_ffmpeg_audio_renderer")
+    val prefEnableParallelDownload = booleanPreferencesKey("enable_parallel_download")
+    val prefParallelDownloadThreads = intPreferencesKey("parallel_download_threads")
+    val prefParallelDownloadOverseas = booleanPreferencesKey("parallel_download_overseas")
     val prefBlacklistUserKey = booleanPreferencesKey("blacklist_user")
     val prefThemeTypeKey = intPreferencesKey("theme_type")
     val prefPlayModeKey = intPreferencesKey("play_mode")
@@ -420,6 +435,9 @@ object PrefKeys {
     val prefPreferOfficialCdnRequest = PreferenceRequest(prefPreferOfficialCdn, false)
     val prefDefaultDanmakuMaskRequest = PreferenceRequest(prefDefaultDanmakuMask, false)
     val prefEnableFfmpegEndererRequest = PreferenceRequest(prefEnableFfmpegAudioRenderer, false)
+    val prefEnableParallelDownloadRequest = PreferenceRequest(prefEnableParallelDownload, false)
+    val prefParallelDownloadThreadsRequest = PreferenceRequest(prefParallelDownloadThreads, 8)
+    val prefParallelDownloadOverseasRequest = PreferenceRequest(prefParallelDownloadOverseas, false)
     val prefBlacklistUserRequest = PreferenceRequest(prefBlacklistUserKey, false)
     val prefThemeTypeRequest = PreferenceRequest(prefThemeTypeKey, ThemeType.Auto.ordinal)
     val prefPlayModeRequest = PreferenceRequest(prefPlayModeKey, PlayMode.Sequential.ordinal)

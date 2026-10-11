@@ -384,13 +384,14 @@ class VideoPlayerV3ViewModel(
         logger.fInfo { "all audio hosts: ${audioUrls.map { with(URI(it)) { "$scheme://$authority" } }}" }
 
         //replace cdn
-        if (Prefs.enableProxy && proxyArea != ProxyArea.MainLand) {
+        val proxied = Prefs.enableProxy && proxyArea != ProxyArea.MainLand
+        if (proxied) {
             videoUrl = videoUrl.replaceUrlDomainWithAliCdn()
             audioUrl = audioUrl.replaceUrlDomainWithAliCdn()
         } else {
             // 如果未通过网络代理获得播放地址，才判断是否应该替换为官方 cdn
-            videoUrl = selectOfficialCdnUrl(videoUrls.filterNotNull())
-            audioUrl = selectOfficialCdnUrl(audioUrls.filterNotNull())
+            videoUrl = selectOfficialCdnUrl(videoUrls.filterNotNull().ifEmpty { listOf(videoUrl) })
+            audioUrl = selectOfficialCdnUrl(audioUrls.filterNotNull().ifEmpty { listOf(audioUrl) })
         }
 
         addLogs("video host: ${with(URI(videoUrl)) { "$scheme://$authority" }}")
@@ -404,7 +405,12 @@ class VideoPlayerV3ViewModel(
             currentVideoWidth = videoItem?.width ?: 0
             logger.info { "Video url: $videoUrl" }
             logger.info { "Audio url: $audioUrl" }
-            videoPlayer!!.playUrl(videoUrl, audioUrl)
+            videoPlayer!!.playUrl(
+                videoUrl,
+                audioUrl,
+                backupUrls(videoUrls.filterNotNull(), proxied),
+                backupUrls(audioUrls.filterNotNull(), proxied)
+            )
             videoPlayer!!.prepare()
             showBuffering = true
         }
@@ -579,18 +585,26 @@ class VideoPlayerV3ViewModel(
             .toString()
     }
 
+    private fun officialCdnUrls(urls: List<String>): List<String> = urls
+        .filter { !it.contains(".mcdn.bilivideo.") }
+        .filter { !it.contains(".szbdyd.com") }
+        .filter {
+            !Regex("^(https?://)?(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d{1,5})?)(/[a-zA-Z0-9_./-]*)?(\\?.*)?$")
+                .matches(it)
+        }
+
+    private fun backupUrls(urls: List<String>, proxied: Boolean): List<String> = when {
+        proxied -> urls.map { it.replaceUrlDomainWithAliCdn() }.distinct()
+        Prefs.preferOfficialCdn -> officialCdnUrls(urls)
+        else -> urls
+    }
+
     private fun selectOfficialCdnUrl(urls: List<String>): String {
         if (!Prefs.preferOfficialCdn) {
             logger.fInfo { "doesn't need to filter official cdn url, select the first url" }
             return urls.first()
         }
-        val filteredUrls = urls
-            .filter { !it.contains(".mcdn.bilivideo.") }
-            .filter { !it.contains(".szbdyd.com") }
-            .filter {
-                !Regex("^(https?://)?(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d{1,5})?)(/[a-zA-Z0-9_./-]*)?(\\?.*)?$")
-                    .matches(it)
-            }
+        val filteredUrls = officialCdnUrls(urls)
         if (filteredUrls.isEmpty()) {
             logger.fInfo { "doesn't find any official cdn url, select the first url" }
             return urls.first()
